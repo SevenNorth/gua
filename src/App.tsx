@@ -84,7 +84,7 @@ const App = () => {
                         </Typography.Paragraph>
                     </div>
                     <div className="animationBox">
-                        {_.map(Array(3), (item, idx) => {
+                        {_.map(Array(3), (_item, idx) => {
                             return (
                                 <div
                                     key={idx}
