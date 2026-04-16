@@ -25,7 +25,7 @@ const PcApp = () => {
     const [guaResult, setGuaResult] = useState<IGua>();
 
     const getExplain = async (gua: string) => {
-        const url = `http://sevennorth.lovinghlx.cn/gua/${gua}.txt`;
+        const url = `/gua/${gua}.txt`;
         const restxt = await (await fetch(url)).text();
         const j1 = atob(restxt);
         const j2 = decodeURIComponent(j1);
