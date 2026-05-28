@@ -5,12 +5,7 @@ import InitMsg from './steps/InitMsg';
 import { Button, Divider, Space } from 'antd';
 import GuaInput from './steps/GuaInput';
 import GuaResult from './steps/GuaResult';
-
-export enum ISTEP {
-    INIT = 'INIT',
-    INPUT = 'INPUT',
-    RESULT = 'RESULT',
-}
+import { ISTEP } from './constants';
 
 const MobileApp = () => {
     const [step, setStep] = useState(ISTEP.INIT);

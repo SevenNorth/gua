@@ -1,7 +1,9 @@
+/** 随机模拟单枚硬币，返回背面 2 或正面 3。 */
 const coinFlip = () => {
-    return Math.floor(Math.random() * 2) == 0 ? 2 : 3;
+    return Math.floor(Math.random() * 2) === 0 ? 2 : 3;
 };
 
+/** 根据浏览器 UA 粗略判断是否使用移动端页面。 */
 const isMobile = () => {
     const ua = navigator.userAgent;
     // 通过ua判断是不是移动端
