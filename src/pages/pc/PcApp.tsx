@@ -1,4 +1,14 @@
-import { Col, Row, Button, Space, Divider } from 'antd';
+import {
+    Button,
+    Col,
+    Divider,
+    Input,
+    Row,
+    Space,
+    Tabs,
+    message,
+} from 'antd';
+import { useEffect } from 'react';
 import './app.less';
 import '../../common.less';
 import CoinAnimation from '../../components/CoinAnimation';
@@ -6,22 +16,57 @@ import GuaExplain from '../../components/GuaExplain';
 import GuaGraph from '../../components/GuaGraph';
 import GuaIntro from '../../components/GuaIntro';
 import GuaManualInput from '../../components/GuaManualInput';
-import { useGuaCasting } from '../../hooks/useGuaCasting';
+import GuaSessionMeta from '../../components/GuaSessionMeta';
+import HistoryPanel from '../../components/HistoryPanel';
+import { useCastingSession } from '../../hooks/useCastingSession';
 import { useGuaExplain } from '../../hooks/useGuaExplain';
+import { buildGuaShareText, copyText } from '../../utils/share';
 
 const PcApp = () => {
     const {
         animating,
+        baseReadingCompleted,
         castCoins,
+        clearHistory,
         coins,
+        createdAt,
         gua,
         guaCode,
-        hasYao,
+        historyRecords,
         isComplete,
-        reset,
+        isQuestionLocked,
+        markBaseReadingCompleted,
+        nextYaoIndex,
+        openHistoryRecord,
+        question,
+        restart,
+        setQuestion,
         setYaoAt,
-    } = useGuaCasting();
+    } = useCastingSession();
     const { error, guaResult, loading } = useGuaExplain(guaCode);
+
+    useEffect(() => {
+        if (guaResult && !baseReadingCompleted) {
+            markBaseReadingCompleted(guaResult);
+        }
+    }, [baseReadingCompleted, guaResult, markBaseReadingCompleted]);
+
+    const handleCopy = async () => {
+        try {
+            await copyText(
+                buildGuaShareText({
+                    question,
+                    createdAt,
+                    lines: gua,
+                    guaCode,
+                    guaResult,
+                }),
+            );
+            message.success('已复制起卦结果');
+        } catch {
+            message.error('复制失败，请稍后重试');
+        }
+    };
 
     return (
         <>
@@ -32,10 +77,10 @@ const PcApp = () => {
                     <div className="btnBox">
                         <Space>
                             <Button
-                                disabled={animating || !hasYao}
-                                onClick={reset}
+                                disabled={animating || !baseReadingCompleted}
+                                onClick={restart}
                             >
-                                重置
+                                重新起卦
                             </Button>
                             <Button
                                 type="primary"
@@ -48,9 +93,24 @@ const PcApp = () => {
                     </div>
                 </Col>
                 <Col span={8} className="guaBox">
-                    <GuaGraph gua={gua} />
+                    <div className="questionBox">
+                        <Divider orientation="left">所问之事</Divider>
+                        <Input.TextArea
+                            autoSize={{ minRows: 3, maxRows: 4 }}
+                            disabled={isQuestionLocked}
+                            maxLength={100}
+                            placeholder="可留空。开始起卦后将锁定。"
+                            showCount
+                            value={question}
+                            onChange={(event) =>
+                                setQuestion(event.target.value)
+                            }
+                        />
+                    </div>
+                    <GuaGraph gua={gua} activeIndex={nextYaoIndex} />
                     <Divider orientation="left"> 手动输入</Divider>
                     <GuaManualInput
+                        activeIndex={nextYaoIndex}
                         disabled={animating}
                         gua={gua}
                         labelColSpan={4}
@@ -59,11 +119,51 @@ const PcApp = () => {
                     />
                 </Col>
                 <Col span={8} className="explainBox">
-                    <Divider orientation="left">解卦</Divider>
-                    <GuaExplain
-                        error={error}
-                        guaResult={guaResult}
-                        loading={loading}
+                    <Tabs
+                        items={[
+                            {
+                                key: 'result',
+                                label: '解卦',
+                                children: (
+                                    <>
+                                        <GuaSessionMeta
+                                            createdAt={createdAt}
+                                            question={question}
+                                        />
+                                        <GuaExplain
+                                            error={error}
+                                            guaResult={guaResult}
+                                            loading={loading}
+                                        />
+                                        {guaResult && (
+                                            <Space className="resultActions">
+                                                <Button onClick={handleCopy}>
+                                                    复制结果
+                                                </Button>
+                                                <Button onClick={restart}>
+                                                    重新起卦
+                                                </Button>
+                                            </Space>
+                                        )}
+                                    </>
+                                ),
+                            },
+                            {
+                                key: 'history',
+                                label: '历史',
+                                children: (
+                                    <HistoryPanel
+                                        disableOpen={
+                                            !baseReadingCompleted &&
+                                            !guaResult
+                                        }
+                                        records={historyRecords}
+                                        onClear={clearHistory}
+                                        onOpen={openHistoryRecord}
+                                    />
+                                ),
+                            },
+                        ]}
                     />
                 </Col>
             </Row>

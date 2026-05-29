@@ -1,42 +1,36 @@
-import { useEffect } from 'react';
 import { Button, Space } from 'antd';
 import CoinAnimation from '../../../components/CoinAnimation';
 import GuaGraph from '../../../components/GuaGraph';
 import GuaManualInput from '../../../components/GuaManualInput';
-import { useGuaCasting } from '../../../hooks/useGuaCasting';
-import { ISTEP } from '../constants';
+import { CoinValue, GuaLines } from '../../../types';
 
 const GuaInput = (props: {
     hasCoins: boolean;
-    setStep: React.Dispatch<React.SetStateAction<ISTEP>>;
-    handleGuaRes: (s: string) => void;
+    animating: boolean;
+    castCoins: () => void;
+    coins: CoinValue[];
+    gua: GuaLines;
+    isComplete: boolean;
+    nextYaoIndex?: number;
+    setYaoAt: (index: number, value: number | null) => void;
 }) => {
-    const { hasCoins, setStep, handleGuaRes } = props;
-
     const {
         animating,
         castCoins,
         coins,
         gua,
-        guaCode,
-        hasYao,
         isComplete,
-        reset,
+        nextYaoIndex,
         setYaoAt,
-    } = useGuaCasting();
-
-    useEffect(() => {
-        if (guaCode) {
-            setStep(ISTEP.RESULT);
-            handleGuaRes(guaCode);
-        }
-    }, [guaCode, handleGuaRes, setStep]);
+        hasCoins,
+    } = props;
 
     return (
         <div className="GuaInput">
-            <GuaGraph gua={gua} />
+            <GuaGraph gua={gua} activeIndex={nextYaoIndex} />
             {hasCoins ? (
                 <GuaManualInput
+                    activeIndex={nextYaoIndex}
                     disabled={animating}
                     gua={gua}
                     labelColSpan={4}
@@ -48,12 +42,6 @@ const GuaInput = (props: {
                     <CoinAnimation animating={animating} coins={coins} />
                     <div className="btnBox">
                         <Space>
-                            <Button
-                                disabled={animating || !hasYao}
-                                onClick={reset}
-                            >
-                                重置
-                            </Button>
                             <Button
                                 type="primary"
                                 disabled={animating || isComplete}

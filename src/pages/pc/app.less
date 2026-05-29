@@ -12,13 +12,23 @@
             margin-top: 2rem;
             text-align: center;
         }
+
     }
 
     .guaBox {
-        padding: 5rem 5rem 0;
+        padding: 2rem 5rem 0;
         display: flex;
         flex-direction: column;
         align-items: center;
+
+        .questionBox {
+            width: 100%;
+            margin-bottom: 3rem;
+
+            .ant-divider {
+                margin: 0 0 1rem;
+            }
+        }
 
         .inputBox {
             width: 100%;
@@ -36,6 +46,15 @@
 
         li {
             list-style: square;
+        }
+
+        .sessionMeta {
+            margin-bottom: 1rem;
+        }
+
+        .resultActions,
+        .historyActions {
+            margin-top: 1rem;
         }
     }
 }

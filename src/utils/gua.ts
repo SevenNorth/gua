@@ -26,6 +26,17 @@ const isGuaComplete = (gua: GuaLines) => gua.every(isValidYaoValue);
 /** 判断当前卦象中是否已有任意一爻。 */
 const hasAnyYao = (gua: GuaLines) => gua.some((yao) => yao !== undefined);
 
+/** 获取下一条待填写爻的展示位置，符合从下往上起卦的规则。 */
+const getNextYaoIndexFromBottom = (gua: GuaLines): number | undefined => {
+    for (let idx = gua.length - 1; idx >= 0; idx -= 1) {
+        if (gua[idx] === undefined) {
+            return idx;
+        }
+    }
+
+    return undefined;
+};
+
 /** 将三枚硬币结果相加为一个爻值。 */
 const sumCoins = (coins: CoinValue[]): YaoValue => {
     const total = coins.reduce<number>((sum, coin) => sum + coin, 0);
@@ -89,6 +100,7 @@ export {
     DEFAULT_COINS,
     appendYaoFromBottom,
     createEmptyGua,
+    getNextYaoIndexFromBottom,
     guaCodeToDisplayLines,
     guaToCode,
     hasAnyYao,

@@ -1,25 +1,38 @@
-import { Form, InputNumber } from 'antd';
+import { Form, InputNumber, Typography } from 'antd';
 import { GuaLines } from '../types';
 
 /** 手动录入六爻结果，输入顺序与页面卦象展示顺序一致。 */
 const GuaManualInput = (props: {
+    activeIndex?: number;
     disabled: boolean;
     gua: GuaLines;
     labelColSpan: number;
     onChange: (index: number, value: number | null) => void;
     wrapperColSpan: number;
 }) => {
-    const { disabled, gua, labelColSpan, onChange, wrapperColSpan } = props;
+    const {
+        activeIndex,
+        disabled,
+        gua,
+        labelColSpan,
+        onChange,
+        wrapperColSpan,
+    } = props;
 
     return (
         <div className="inputBox">
+            <Typography.Paragraph type="secondary" className="inputHint">
+                请从初爻开始，按从下到上的顺序填写。
+            </Typography.Paragraph>
             {gua.map((yao, idx) => {
                 return (
                     <Form.Item
                         labelCol={{ span: labelColSpan }}
                         wrapperCol={{ span: wrapperColSpan }}
                         key={idx}
-                        label={`爻 ${6 - idx}`}
+                        label={`${idx === activeIndex ? '当前：' : ''}爻 ${
+                            6 - idx
+                        }`}
                         rules={[
                             {
                                 required: true,

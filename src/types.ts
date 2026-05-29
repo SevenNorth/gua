@@ -16,3 +16,31 @@ export type YaoValue = 6 | 7 | 8 | 9;
 
 /** 页面按从上到下的显示顺序存放六爻，未完成的爻为 undefined。 */
 export type GuaLines = Array<YaoValue | undefined>;
+
+/** 起卦模式：在线抛硬币或手动录入真实硬币结果。 */
+export type CastingMode = 'online' | 'manual';
+
+/** 当前起卦流程所在步骤。 */
+export type CastingStep = 'init' | 'input' | 'result';
+
+/** 当前起卦流程快照，用于刷新页面后恢复状态。 */
+export interface CastingSnapshot {
+    version: 1;
+    question: string;
+    createdAt: string;
+    step: CastingStep;
+    mode?: CastingMode;
+    gua: GuaLines;
+    guaCode?: string;
+    baseReadingCompleted: boolean;
+}
+
+/** 本地历史记录，保存最近完成基础解卦的起卦结果。 */
+export interface GuaHistoryRecord {
+    id: string;
+    question: string;
+    createdAt: string;
+    lines: GuaLines;
+    guaCode: string;
+    guaName: string;
+}
