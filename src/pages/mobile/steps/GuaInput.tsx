@@ -9,6 +9,7 @@ const GuaInput = (props: {
     animating: boolean;
     castCoins: () => void;
     coins: CoinValue[];
+    disabled?: boolean;
     gua: GuaLines;
     isComplete: boolean;
     nextYaoIndex?: number;
@@ -18,6 +19,7 @@ const GuaInput = (props: {
         animating,
         castCoins,
         coins,
+        disabled,
         gua,
         isComplete,
         nextYaoIndex,
@@ -31,7 +33,7 @@ const GuaInput = (props: {
             {hasCoins ? (
                 <GuaManualInput
                     activeIndex={nextYaoIndex}
-                    disabled={animating}
+                    disabled={!!disabled || animating}
                     gua={gua}
                     labelColSpan={4}
                     onChange={setYaoAt}
@@ -44,7 +46,7 @@ const GuaInput = (props: {
                         <Space>
                             <Button
                                 type="primary"
-                                disabled={animating || isComplete}
+                                disabled={!!disabled || animating || isComplete}
                                 onClick={castCoins}
                             >
                                 抛硬币

@@ -17,6 +17,7 @@ type StoredGuaLine = YaoValue | null;
 
 interface StoredCastingSnapshot {
     version: 1;
+    castingId?: string;
     question: string;
     createdAt: string;
     step: CastingStep;
@@ -122,6 +123,10 @@ const loadCurrentCastingSnapshot = (): CastingSnapshot | undefined => {
 
     return {
         version: SNAPSHOT_VERSION,
+        castingId:
+            typeof snapshot.castingId === 'string'
+                ? snapshot.castingId
+                : undefined,
         question: snapshot.question,
         createdAt: snapshot.createdAt,
         step: snapshot.step,

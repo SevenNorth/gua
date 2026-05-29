@@ -26,6 +26,7 @@ export type CastingStep = 'init' | 'input' | 'result';
 /** 当前起卦流程快照，用于刷新页面后恢复状态。 */
 export interface CastingSnapshot {
     version: 1;
+    castingId?: string;
     question: string;
     createdAt: string;
     step: CastingStep;
@@ -63,4 +64,10 @@ export interface UsageSummary {
     allowed: boolean;
     nextResetAt: string;
     updatedAt: string;
+}
+
+/** 后端次数状态。 */
+export interface UsageState {
+    castingUsage?: UsageSummary;
+    detailReadingUsage?: UsageSummary;
 }

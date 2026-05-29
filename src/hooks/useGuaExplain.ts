@@ -3,8 +3,8 @@ import { getGuaExplain } from '../services/gua';
 import { IGua } from '../types';
 
 /** 按卦码加载解卦结果，并暴露加载状态与错误信息。 */
-const useGuaExplain = (guaCode: string | undefined) => {
-    const [guaResult, setGuaResult] = useState<IGua>();
+const useGuaExplain = (guaCode: string | undefined, initialResult?: IGua) => {
+    const [guaResult, setGuaResult] = useState<IGua | undefined>(initialResult);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>();
 
@@ -12,6 +12,14 @@ const useGuaExplain = (guaCode: string | undefined) => {
         let ignoreResult = false;
 
         setError(undefined);
+
+        if (initialResult) {
+            setGuaResult(initialResult);
+            setLoading(false);
+            return () => {
+                ignoreResult = true;
+            };
+        }
 
         if (!guaCode) {
             setGuaResult(undefined);
@@ -44,7 +52,7 @@ const useGuaExplain = (guaCode: string | undefined) => {
         return () => {
             ignoreResult = true;
         };
-    }, [guaCode]);
+    }, [guaCode, initialResult]);
 
     return { error, guaResult, loading };
 };

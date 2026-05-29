@@ -10,6 +10,8 @@ import { buildGuaShareText, copyText } from '../../../utils/share';
 
 const GuaResult = (props: {
     baseReadingCompleted: boolean;
+    baseReadingResult?: IGua;
+    castingId?: string;
     createdAt: string;
     gua: GuaLines;
     guaCode: string | undefined;
@@ -19,6 +21,8 @@ const GuaResult = (props: {
 }) => {
     const {
         baseReadingCompleted,
+        baseReadingResult,
+        castingId,
         createdAt,
         gua,
         guaCode,
@@ -26,7 +30,10 @@ const GuaResult = (props: {
         question,
         restart,
     } = props;
-    const { error, guaResult, loading } = useGuaExplain(guaCode);
+    const { error, guaResult, loading } = useGuaExplain(
+        guaCode,
+        baseReadingResult,
+    );
 
     useEffect(() => {
         if (guaResult && !baseReadingCompleted) {
@@ -71,6 +78,7 @@ const GuaResult = (props: {
             )}
             {guaCode && guaResult && (
                 <AiDetailReading
+                    castingId={castingId}
                     gua={gua}
                     guaCode={guaCode}
                     question={question}

@@ -1,4 +1,5 @@
 import {
+    Alert,
     Button,
     Col,
     Divider,
@@ -6,6 +7,7 @@ import {
     Row,
     Space,
     Tabs,
+    Typography,
     message,
 } from 'antd';
 import { useEffect } from 'react';
@@ -26,14 +28,19 @@ import { buildGuaShareText, copyText } from '../../utils/share';
 const PcApp = () => {
     const {
         animating,
+        apiError,
         baseReadingCompleted,
+        baseReadingResult,
         castCoins,
+        castingId,
+        castingUsage,
         clearHistory,
         coins,
         createdAt,
         gua,
         guaCode,
         historyRecords,
+        initializing,
         isComplete,
         isQuestionLocked,
         markBaseReadingCompleted,
@@ -43,8 +50,12 @@ const PcApp = () => {
         restart,
         setQuestion,
         setYaoAt,
+        starting,
     } = useCastingSession();
-    const { error, guaResult, loading } = useGuaExplain(guaCode);
+    const { error, guaResult, loading } = useGuaExplain(
+        guaCode,
+        baseReadingResult,
+    );
 
     useEffect(() => {
         if (guaResult && !baseReadingCompleted) {
@@ -74,6 +85,19 @@ const PcApp = () => {
             <Row className="contentBox">
                 <Col span={8} className="yaoBox">
                     <GuaIntro />
+                    {apiError && (
+                        <Alert
+                            className="apiAlert"
+                            message={apiError}
+                            showIcon
+                            type="error"
+                        />
+                    )}
+                    {castingUsage && (
+                        <Typography.Text type="secondary">
+                            今日剩余起卦 {castingUsage.remaining} 次
+                        </Typography.Text>
+                    )}
                     <CoinAnimation animating={animating} coins={coins} />
                     <div className="btnBox">
                         <Space>
@@ -85,7 +109,14 @@ const PcApp = () => {
                             </Button>
                             <Button
                                 type="primary"
-                                disabled={animating || isComplete}
+                                disabled={
+                                    animating ||
+                                    initializing ||
+                                    starting ||
+                                    isComplete ||
+                                    (!castingId &&
+                                        castingUsage?.allowed === false)
+                                }
                                 onClick={castCoins}
                             >
                                 抛硬币
@@ -112,7 +143,12 @@ const PcApp = () => {
                     <Divider orientation="left"> 手动输入</Divider>
                     <GuaManualInput
                         activeIndex={nextYaoIndex}
-                        disabled={animating}
+                        disabled={
+                            animating ||
+                            initializing ||
+                            starting ||
+                            (!castingId && castingUsage?.allowed === false)
+                        }
                         gua={gua}
                         labelColSpan={4}
                         onChange={setYaoAt}
@@ -138,6 +174,7 @@ const PcApp = () => {
                                         />
                                         {guaResult && (
                                             <AiDetailReading
+                                                castingId={castingId}
                                                 gua={gua}
                                                 guaCode={guaCode}
                                                 question={question}
@@ -162,8 +199,9 @@ const PcApp = () => {
                                 children: (
                                     <HistoryPanel
                                         disableOpen={
-                                            !baseReadingCompleted &&
-                                            !guaResult
+                                            !!castingId ||
+                                            (!baseReadingCompleted &&
+                                                !guaResult)
                                         }
                                         records={historyRecords}
                                         onClear={clearHistory}

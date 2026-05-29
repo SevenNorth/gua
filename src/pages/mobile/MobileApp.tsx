@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import '../../common.less';
 import './style.less';
 import InitMsg from './steps/InitMsg';
-import { Button, Divider, Drawer, Input, Space } from 'antd';
+import { Alert, Button, Divider, Drawer, Input, Space, Typography } from 'antd';
 import GuaInput from './steps/GuaInput';
 import GuaResult from './steps/GuaResult';
 import { ISTEP } from './constants';
@@ -13,14 +13,19 @@ import { CastingMode } from '../../types';
 const MobileApp = () => {
     const {
         animating,
+        apiError,
         baseReadingCompleted,
+        baseReadingResult,
         castCoins,
+        castingId,
+        castingUsage,
         clearHistory,
         coins,
         createdAt,
         gua,
         guaCode,
         historyRecords,
+        initializing,
         isComplete,
         isQuestionLocked,
         markBaseReadingCompleted,
@@ -32,6 +37,7 @@ const MobileApp = () => {
         setQuestion,
         setYaoAt,
         startCasting,
+        starting,
         step,
     } = useCastingSession();
     const [historyOpen, setHistoryOpen] = useState(false);
@@ -89,6 +95,11 @@ const MobileApp = () => {
                         animating={animating}
                         castCoins={castCoins}
                         coins={coins}
+                        disabled={
+                            initializing ||
+                            starting ||
+                            (!castingId && castingUsage?.allowed === false)
+                        }
                         gua={gua}
                         hasCoins={hasCoins}
                         isComplete={isComplete}
@@ -101,6 +112,8 @@ const MobileApp = () => {
                 c = (
                     <GuaResult
                         baseReadingCompleted={baseReadingCompleted}
+                        baseReadingResult={baseReadingResult}
+                        castingId={castingId}
                         createdAt={createdAt}
                         gua={gua}
                         guaCode={guaCode}
@@ -117,13 +130,17 @@ const MobileApp = () => {
     }, [
         animating,
         baseReadingCompleted,
+        baseReadingResult,
         castCoins,
+        castingId,
+        castingUsage,
         coins,
         createdAt,
         gua,
         guaCode,
         hasCoins,
         isComplete,
+        initializing,
         isQuestionLocked,
         markBaseReadingCompleted,
         mobileStep,
@@ -132,17 +149,36 @@ const MobileApp = () => {
         restart,
         setQuestion,
         setYaoAt,
+        starting,
     ]);
 
     return (
         <div className="Mobile_App_Box">
             {content}
+            {apiError && (
+                <Alert
+                    className="apiAlert"
+                    message={apiError}
+                    showIcon
+                    type="error"
+                />
+            )}
             {mobileStep === ISTEP.INIT && (
                 <div className="btnBox">
+                    {castingUsage && (
+                        <Typography.Paragraph type="secondary">
+                            今日剩余起卦 {castingUsage.remaining} 次
+                        </Typography.Paragraph>
+                    )}
                     <Divider orientation="center">选择模式</Divider>
 
                     <Space>
                         <Button
+                            disabled={
+                                initializing ||
+                                starting ||
+                                castingUsage?.allowed === false
+                            }
                             onClick={() => {
                                 handleStart('online');
                             }}
@@ -151,6 +187,11 @@ const MobileApp = () => {
                         </Button>
                         <Button
                             type="primary"
+                            disabled={
+                                initializing ||
+                                starting ||
+                                castingUsage?.allowed === false
+                            }
                             onClick={() => {
                                 handleStart('manual');
                             }}
@@ -173,6 +214,7 @@ const MobileApp = () => {
                 onClose={() => setHistoryOpen(false)}
             >
                 <HistoryPanel
+                    disableOpen={!!castingId}
                     records={historyRecords}
                     onClear={clearHistory}
                     onOpen={openHistoryRecord}

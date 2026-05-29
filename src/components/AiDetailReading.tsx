@@ -1,6 +1,9 @@
 import { Alert, Button, Divider, Space, Typography } from 'antd';
 import { useEffect, useState } from 'react';
-import { createAiDetailReading } from '../services/detailReading';
+import {
+    createAiDetailReading,
+    createCastingDetailReading,
+} from '../services/detailReading';
 import { DetailReadingResult, GuaLines } from '../types';
 
 const ReadingList = (props: { items: string[] }) => (
@@ -12,11 +15,14 @@ const ReadingList = (props: { items: string[] }) => (
 );
 
 const AiDetailReading = (props: {
+    castingId?: string;
     gua: GuaLines;
     guaCode?: string;
     question: string;
 }) => {
-    const { gua, guaCode, question } = props;
+    const { castingId, gua, guaCode, question } = props;
+    const trimmedQuestion = question.trim();
+    const hasQuestion = trimmedQuestion.length > 0;
     const [error, setError] = useState<string>();
     const [loading, setLoading] = useState(false);
     const [remaining, setRemaining] = useState<number>();
@@ -27,10 +33,10 @@ const AiDetailReading = (props: {
         setLoading(false);
         setRemaining(undefined);
         setResult(undefined);
-    }, [guaCode, question]);
+    }, [castingId, guaCode, question]);
 
     const handleGenerate = async () => {
-        if (!guaCode || loading) {
+        if (!guaCode || !hasQuestion || loading) {
             return;
         }
 
@@ -38,11 +44,13 @@ const AiDetailReading = (props: {
         setLoading(true);
 
         try {
-            const response = await createAiDetailReading({
-                question,
-                guaCode,
-                gua,
-            });
+            const response = castingId
+                ? await createCastingDetailReading(castingId)
+                : await createAiDetailReading({
+                      question: trimmedQuestion,
+                      guaCode,
+                      gua,
+                  });
             setResult(response.result);
             setRemaining(response.usage?.remaining);
         } catch (err: unknown) {
@@ -58,7 +66,7 @@ const AiDetailReading = (props: {
             <Space className="aiDetailActions" align="center">
                 <Button
                     type="primary"
-                    disabled={!guaCode}
+                    disabled={!guaCode || !hasQuestion}
                     loading={loading}
                     onClick={handleGenerate}
                 >

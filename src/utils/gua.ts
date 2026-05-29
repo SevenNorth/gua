@@ -96,6 +96,29 @@ const guaCodeToDisplayLines = (guaCode: string): GuaLines => {
         .map((line) => (line === '1' ? 7 : 8));
 };
 
+/** 将页面展示顺序的六爻转换为后端使用的从下到上顺序。 */
+const guaToLinesFromBottom = (gua: GuaLines): YaoValue[] => {
+    if (!isGuaComplete(gua)) {
+        throw new Error('Invalid gua lines');
+    }
+
+    return [...gua].reverse() as YaoValue[];
+};
+
+/** 将后端从下到上保存的六爻转换为页面从上到下展示的顺序。 */
+const linesFromBottomToDisplayLines = (lines: unknown): GuaLines | undefined => {
+    if (!Array.isArray(lines) || lines.length !== GUA_LINE_COUNT) {
+        return undefined;
+    }
+
+    const displayLines = [...lines].reverse();
+    if (!displayLines.every(isValidYaoValue)) {
+        return undefined;
+    }
+
+    return displayLines as GuaLines;
+};
+
 export {
     DEFAULT_COINS,
     appendYaoFromBottom,
@@ -103,10 +126,12 @@ export {
     getNextYaoIndexFromBottom,
     guaCodeToDisplayLines,
     guaToCode,
+    guaToLinesFromBottom,
     hasAnyYao,
     isGuaComplete,
     isValidYaoValue,
     isYangYao,
+    linesFromBottomToDisplayLines,
     sumCoins,
     updateYaoAtIndex,
 };
