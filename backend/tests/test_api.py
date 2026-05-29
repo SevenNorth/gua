@@ -60,6 +60,7 @@ def test_casting_flow_and_detail_reading_cache(tmp_path: Path, monkeypatch) -> N
     def fake_detail_reading(*args, **kwargs):
         return {
             "title": "乾为天 AI 解读",
+            "questionCategory": "事业工作",
             "questionSummary": "是否适合推进计划？",
             "overallJudgement": "当前适合稳步推进，但仍需保留调整空间。",
             "keyAdvice": ["先验证关键条件。"],
@@ -120,6 +121,7 @@ def test_ai_detail_reading_endpoint_counts_usage(tmp_path: Path, monkeypatch) ->
     def fake_detail_reading(*args, **kwargs):
         return {
             "title": "乾为天 AI 解读",
+            "questionCategory": "事业工作",
             "questionSummary": "是否适合推进计划？",
             "overallJudgement": "当前适合稳步推进，但仍需保留调整空间。",
             "keyAdvice": ["先验证关键条件。"],
@@ -179,14 +181,33 @@ def test_casting_creation_is_unlimited(tmp_path: Path) -> None:
 def test_parse_ai_result_accepts_json_code_fence() -> None:
     result = _parse_ai_result(
         """```json
-{"title":"参考解读","questionSummary":"问题摘要","overallJudgement":"仅供参考。","keyAdvice":["稳步推进"],"risks":["避免冒进"],"actionItems":["先做验证"]}
+{"title":"参考解读","questionCategory":"事业工作","questionSummary":"问题摘要","overallJudgement":"仅供参考。","keyAdvice":["稳步推进"],"risks":["避免冒进"],"actionItems":["先做验证"]}
 ```"""
     )
 
     assert result["title"] == "参考解读"
+    assert result["questionCategory"] == "事业工作"
     assert result["keyAdvice"] == ["稳步推进"]
 
 
 def test_parse_ai_result_rejects_incomplete_payload() -> None:
     with pytest.raises(ApiError):
         _parse_ai_result('{"title":"缺字段"}')
+
+
+def test_parse_ai_result_rejects_unknown_category() -> None:
+    with pytest.raises(ApiError):
+        _parse_ai_result(
+            json.dumps(
+                {
+                    "title": "参考解读",
+                    "questionCategory": "未知分类",
+                    "questionSummary": "问题摘要",
+                    "overallJudgement": "仅供参考。",
+                    "keyAdvice": ["稳步推进"],
+                    "risks": ["避免冒进"],
+                    "actionItems": ["先做验证"],
+                },
+                ensure_ascii=False,
+            )
+        )

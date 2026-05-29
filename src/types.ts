@@ -49,6 +49,7 @@ export interface GuaHistoryRecord {
 /** AI 详细解卦返回内容。 */
 export interface DetailReadingResult {
     title: string;
+    questionCategory?: string;
     questionSummary: string;
     overallJudgement: string;
     keyAdvice: string[];

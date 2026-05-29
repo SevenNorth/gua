@@ -149,21 +149,24 @@ const PcApp = () => {
                 </Col>
                 <Col span={8} className="explainBox">
                     <Tabs
+                        className="resultTabs"
                         items={[
                             {
                                 key: 'result',
                                 label: '解卦',
                                 children: (
-                                    <>
+                                    <div className="resultTabPane">
                                         <GuaSessionMeta
                                             createdAt={createdAt}
                                             question={question}
                                         />
-                                        <GuaExplain
-                                            error={error}
-                                            guaResult={guaResult}
-                                            loading={loading}
-                                        />
+                                        <div className="readingScrollArea">
+                                            <GuaExplain
+                                                error={error}
+                                                guaResult={guaResult}
+                                                loading={loading}
+                                            />
+                                        </div>
                                         {guaResult && (
                                             <Space className="resultActions">
                                                 <AiDetailReading
@@ -180,23 +183,25 @@ const PcApp = () => {
                                                 </Button>
                                             </Space>
                                         )}
-                                    </>
+                                    </div>
                                 ),
                             },
                             {
                                 key: 'history',
                                 label: '历史',
                                 children: (
-                                    <HistoryPanel
-                                        disableOpen={
-                                            !!castingId ||
-                                            (!baseReadingCompleted &&
-                                                !guaResult)
-                                        }
-                                        records={historyRecords}
-                                        onClear={clearHistory}
-                                        onOpen={openHistoryRecord}
-                                    />
+                                    <div className="historyTabPane">
+                                        <HistoryPanel
+                                            disableOpen={
+                                                !!castingId ||
+                                                (!baseReadingCompleted &&
+                                                    !guaResult)
+                                            }
+                                            records={historyRecords}
+                                            onClear={clearHistory}
+                                            onOpen={openHistoryRecord}
+                                        />
+                                    </div>
                                 ),
                             },
                         ]}

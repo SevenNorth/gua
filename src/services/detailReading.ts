@@ -27,6 +27,8 @@ const isDetailReadingResult = (
     const result = value as Partial<DetailReadingResult>;
     return (
         typeof result.title === 'string' &&
+        (result.questionCategory === undefined ||
+            typeof result.questionCategory === 'string') &&
         typeof result.questionSummary === 'string' &&
         typeof result.overallJudgement === 'string' &&
         isStringArray(result.keyAdvice) &&
