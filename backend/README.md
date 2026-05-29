@@ -7,7 +7,15 @@
 ```bash
 uv sync
 uv run alembic upgrade head
-uv run uvicorn wenyao_backend.main:app --reload
+uv run main.py
+```
+
+AI 详细解卦使用 OpenAI v1 兼容接口。复制 `backend/.env.example` 为 `backend/.env`，填写：
+
+```env
+WENYAO_AI_BASE_URL=https://your-model-host/v1
+WENYAO_AI_API_KEY=your-api-key
+WENYAO_AI_MODEL=your-model-name
 ```
 
 服务默认读取仓库根目录：
@@ -23,9 +31,14 @@ uv run uvicorn wenyao_backend.main:app --reload
 - `WENYAO_ALLOWED_ORIGINS`：CORS 白名单，逗号分隔
 - `WENYAO_TIMEZONE`：每日次数统计时区，默认 `Asia/Shanghai`
 - `WENYAO_SQLITE_JOURNAL_MODE`：SQLite journal mode，开发默认 `MEMORY`，生产默认 `WAL`
+- `WENYAO_AI_BASE_URL`：OpenAI v1 兼容模型地址，例如 `https://example.com/v1`
+- `WENYAO_AI_API_KEY`：模型服务密钥
+- `WENYAO_AI_MODEL`：模型名称
+- `WENYAO_AI_TEMPERATURE`：生成温度，默认 `0.7`
+- `WENYAO_AI_TIMEOUT_SECONDS`：模型调用超时时间，默认 `60`
 
 ## 接口约定
 
 `PATCH /api/castings/{castingId}/lines` 的 `lines` 按“初爻到上爻”顺序提交，也就是从下到上共 6 个值。
 
-详细解卦当前是本地结构化生成，用于打通业务流程；后续可以在 `wenyao_backend/readings.py` 中替换为模型生成服务。
+详细解卦由 `wenyao_backend/readings.py` 通过 LangChain 调用 OpenAI v1 兼容模型生成。

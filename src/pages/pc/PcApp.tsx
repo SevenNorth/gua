@@ -11,6 +11,7 @@ import {
 import { useEffect } from 'react';
 import './app.less';
 import '../../common.less';
+import AiDetailReading from '../../components/AiDetailReading';
 import CoinAnimation from '../../components/CoinAnimation';
 import GuaExplain from '../../components/GuaExplain';
 import GuaGraph from '../../components/GuaGraph';
@@ -135,6 +136,13 @@ const PcApp = () => {
                                             guaResult={guaResult}
                                             loading={loading}
                                         />
+                                        {guaResult && (
+                                            <AiDetailReading
+                                                gua={gua}
+                                                guaCode={guaCode}
+                                                question={question}
+                                            />
+                                        )}
                                         {guaResult && (
                                             <Space className="resultActions">
                                                 <Button onClick={handleCopy}>

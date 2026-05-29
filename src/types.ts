@@ -44,3 +44,23 @@ export interface GuaHistoryRecord {
     guaCode: string;
     guaName: string;
 }
+
+/** AI 详细解卦返回内容。 */
+export interface DetailReadingResult {
+    title: string;
+    questionSummary: string;
+    overallJudgement: string;
+    keyAdvice: string[];
+    risks: string[];
+    actionItems: string[];
+}
+
+/** 后端每日次数摘要。 */
+export interface UsageSummary {
+    date: string;
+    used: number;
+    remaining: number;
+    allowed: boolean;
+    nextResetAt: string;
+    updatedAt: string;
+}

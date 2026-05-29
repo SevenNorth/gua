@@ -12,7 +12,7 @@ from .database import get_db
 from .errors import ApiError
 from .gua_data import build_gua_code, load_gua_data, validate_lines
 from .models import Casting, DetailReading, Visitor
-from .readings import generate_detail_reading
+from .readings import generate_casting_detail_reading, generate_detail_reading
 from .serializers import serialize_casting, serialize_detail_reading, serialize_visitor
 from .time import utcnow
 from .usage import get_usage, get_usage_summary, next_reset_at
@@ -32,6 +32,12 @@ class CreateCastingRequest(BaseModel):
 
 
 class UpdateLinesRequest(BaseModel):
+    lines: list[int] = Field(min_length=6, max_length=6)
+
+
+class AiDetailReadingRequest(BaseModel):
+    question: str = Field(default="", max_length=500)
+    guaCode: str = Field(min_length=6, max_length=6)
     lines: list[int] = Field(min_length=6, max_length=6)
 
 
@@ -204,6 +210,67 @@ def update_casting_lines(
     }
 
 
+@router.post("/ai-detail-reading")
+def create_ai_detail_reading(
+    payload: AiDetailReadingRequest,
+    db: DbSession,
+    visitor: VisitorDep,
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> dict:
+    lines = validate_lines(payload.lines)
+    if build_gua_code(lines) != payload.guaCode:
+        raise ApiError("INVALID_LINES", "lines 与 guaCode 不匹配。", status_code=422)
+
+    usage = get_usage(db, visitor.visitor_id, settings)
+    if usage.detail_reading_count >= settings.detail_reading_daily_limit:
+        raise ApiError(
+            "DETAIL_READING_LIMIT_EXCEEDED",
+            "今日详细解卦次数已用完，请明日再来。",
+            status_code=429,
+            details={
+                "detailReadingUsage": get_usage_summary(
+                    db,
+                    visitor.visitor_id,
+                    settings,
+                    kind="detail_reading",
+                ),
+                "nextResetAt": next_reset_at(settings).isoformat(),
+            },
+        )
+
+    base_reading = load_gua_data(settings.gua_data_dir, payload.guaCode)
+    try:
+        result = generate_detail_reading(
+            question=payload.question,
+            lines=lines,
+            gua_data=base_reading,
+            settings=settings,
+        )
+    except ApiError:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise ApiError(
+            "DETAIL_READING_GENERATION_FAILED",
+            "AI 详细解卦生成失败，请稍后重试。",
+            status_code=500,
+        ) from exc
+
+    usage.detail_reading_count += 1
+    usage.updated_at = utcnow()
+    usage_payload_data = usage_payload(db, visitor.visitor_id, settings)
+    db.commit()
+
+    return {
+        "detailReading": {
+            "status": "completed",
+            "result": result,
+        },
+        **usage_payload_data,
+    }
+
+
 @router.post("/castings/{casting_id}/restart")
 def restart_casting(
     casting_id: str,
@@ -286,7 +353,7 @@ def create_or_get_detail_reading(
 
     try:
         base_reading = load_gua_data(settings.gua_data_dir, casting.gua_code)
-        result = generate_detail_reading(casting, base_reading)
+        result = generate_casting_detail_reading(casting, base_reading, settings)
     except ApiError:
         detail.status = "failed"
         detail.usage_counted = False

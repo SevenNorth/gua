@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Button, Divider, Space, Typography, message } from 'antd';
+import AiDetailReading from '../../../components/AiDetailReading';
 import GuaExplain from '../../../components/GuaExplain';
 import GuaGraph from '../../../components/GuaGraph';
 import GuaSessionMeta from '../../../components/GuaSessionMeta';
@@ -66,6 +67,13 @@ const GuaResult = (props: {
                     error={error}
                     guaResult={guaResult}
                     loading={loading}
+                />
+            )}
+            {guaCode && guaResult && (
+                <AiDetailReading
+                    gua={gua}
+                    guaCode={guaCode}
+                    question={question}
                 />
             )}
             {guaResult && (

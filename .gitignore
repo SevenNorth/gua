@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 
 # Python backend
+backend/.env
 backend/.venv
 backend/.pytest_cache
 backend/.ruff_cache

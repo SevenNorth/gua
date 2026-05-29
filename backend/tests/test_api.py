@@ -3,10 +3,13 @@ import json
 from pathlib import Path
 from urllib.parse import quote
 
+import pytest
 from fastapi.testclient import TestClient
 
 from wenyao_backend.app import create_app
 from wenyao_backend.config import Settings
+from wenyao_backend.errors import ApiError
+from wenyao_backend.readings import _parse_ai_result
 
 
 def write_gua_file(gua_dir: Path, gua_code: str = "111111") -> None:
@@ -44,11 +47,31 @@ def make_client(tmp_path: Path) -> TestClient:
         visitor_retention_days=180,
         sqlite_journal_mode="WAL",
         auto_create_db=True,
+        ai_base_url="https://example.test/v1",
+        ai_api_key="test-key",
+        ai_model="test-model",
+        ai_temperature=0.7,
+        ai_timeout_seconds=60,
     )
     return TestClient(create_app(settings))
 
 
-def test_casting_flow_and_detail_reading_cache(tmp_path: Path) -> None:
+def test_casting_flow_and_detail_reading_cache(tmp_path: Path, monkeypatch) -> None:
+    def fake_detail_reading(*args, **kwargs):
+        return {
+            "title": "乾为天 AI 解读",
+            "questionSummary": "是否适合推进计划？",
+            "overallJudgement": "当前适合稳步推进，但仍需保留调整空间。",
+            "keyAdvice": ["先验证关键条件。"],
+            "risks": ["避免过度自信。"],
+            "actionItems": ["列出本周行动。"],
+        }
+
+    monkeypatch.setattr(
+        "wenyao_backend.routes.generate_casting_detail_reading",
+        fake_detail_reading,
+    )
+
     with make_client(tmp_path) as client:
         session_response = client.get("/api/visitor/session")
         assert session_response.status_code == 200
@@ -91,3 +114,52 @@ def test_casting_flow_and_detail_reading_cache(tmp_path: Path) -> None:
         assert cached_response.status_code == 200
         assert cached_response.json()["detailReading"]["detailReadingId"] == detail_id
         assert cached_response.json()["detailReadingUsage"]["used"] == 1
+
+
+def test_ai_detail_reading_endpoint_counts_usage(tmp_path: Path, monkeypatch) -> None:
+    def fake_detail_reading(*args, **kwargs):
+        return {
+            "title": "乾为天 AI 解读",
+            "questionSummary": "是否适合推进计划？",
+            "overallJudgement": "当前适合稳步推进，但仍需保留调整空间。",
+            "keyAdvice": ["先验证关键条件。"],
+            "risks": ["避免过度自信。"],
+            "actionItems": ["列出本周行动。"],
+        }
+
+    monkeypatch.setattr(
+        "wenyao_backend.routes.generate_detail_reading",
+        fake_detail_reading,
+    )
+
+    with make_client(tmp_path) as client:
+        response = client.post(
+            "/api/ai-detail-reading",
+            json={
+                "question": "是否适合推进计划？",
+                "guaCode": "111111",
+                "lines": [7, 7, 7, 7, 7, 7],
+            },
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["detailReading"]["status"] == "completed"
+        assert body["detailReading"]["result"]["title"] == "乾为天 AI 解读"
+        assert body["detailReadingUsage"]["used"] == 1
+
+
+def test_parse_ai_result_accepts_json_code_fence() -> None:
+    result = _parse_ai_result(
+        """```json
+{"title":"参考解读","questionSummary":"问题摘要","overallJudgement":"仅供参考。","keyAdvice":["稳步推进"],"risks":["避免冒进"],"actionItems":["先做验证"]}
+```"""
+    )
+
+    assert result["title"] == "参考解读"
+    assert result["keyAdvice"] == ["稳步推进"]
+
+
+def test_parse_ai_result_rejects_incomplete_payload() -> None:
+    with pytest.raises(ApiError):
+        _parse_ai_result('{"title":"缺字段"}')

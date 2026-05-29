@@ -3,6 +3,8 @@ from os import environ
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from dotenv import load_dotenv
+
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
@@ -20,6 +22,13 @@ def _int_env(name: str, default: int) -> int:
     if raw_value is None:
         return default
     return int(raw_value)
+
+
+def _float_env(name: str, default: float) -> float:
+    raw_value = environ.get(name)
+    if raw_value is None:
+        return default
+    return float(raw_value)
 
 
 def _list_env(name: str, default: list[str]) -> list[str]:
@@ -52,14 +61,25 @@ class Settings:
     visitor_retention_days: int
     sqlite_journal_mode: str
     auto_create_db: bool
+    ai_base_url: str
+    ai_api_key: str
+    ai_model: str
+    ai_temperature: float
+    ai_timeout_seconds: int
 
     @property
     def timezone(self) -> ZoneInfo:
         return ZoneInfo(self.timezone_name)
 
+    @property
+    def ai_configured(self) -> bool:
+        return bool(self.ai_base_url and self.ai_api_key and self.ai_model)
+
 
 def load_settings() -> Settings:
     root = _repo_root()
+    load_dotenv(root / "backend" / ".env")
+
     env = environ.get("WENYAO_ENV", "development")
     default_database_path = root / "data" / "wenyao.db"
     default_database_url = _sqlite_url(default_database_path)
@@ -89,4 +109,9 @@ def load_settings() -> Settings:
             "MEMORY" if env == "development" else "WAL",
         ).upper(),
         auto_create_db=_bool_env("WENYAO_AUTO_CREATE_DB", True),
+        ai_base_url=environ.get("WENYAO_AI_BASE_URL", "").strip(),
+        ai_api_key=environ.get("WENYAO_AI_API_KEY", "").strip(),
+        ai_model=environ.get("WENYAO_AI_MODEL", "").strip(),
+        ai_temperature=_float_env("WENYAO_AI_TEMPERATURE", 0.7),
+        ai_timeout_seconds=_int_env("WENYAO_AI_TIMEOUT_SECONDS", 60),
     )
