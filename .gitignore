@@ -36,3 +36,7 @@ data/*.db
 data/*.db-*
 backend/*.db
 backend/*.db-*
+
+# Deployment secrets
+deploy/*.env
+!deploy/*.env.example
