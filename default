@@ -1,0 +1,400 @@
+server {
+		server_name  www.lovinghlx.cn;
+		root         /webapps/portal;
+
+		location / {  
+				index index.html index.htm;
+		}
+
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/picsur.lovinghlx.cn/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/picsur.lovinghlx.cn/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+}
+
+server {
+		server_name  lovinghlx.cn;
+		root         /webapps/portal;
+
+		location / {  
+				index index.html index.htm;
+		}
+
+
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/picsur.lovinghlx.cn/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/picsur.lovinghlx.cn/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+}
+
+server {
+    server_name dify.lovinghlx.cn;
+
+    location / {
+        proxy_pass http://localhost:8080;  # 反向代理到 Docker 容器的 Nginx 服务
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/picsur.lovinghlx.cn/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/picsur.lovinghlx.cn/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+}
+
+# blog
+server {
+		server_name  log.lovinghlx.cn;
+		root         /webapps/fjf-blog;
+		index index.html index.htm;
+
+		location / {  
+				index index.html index.htm;
+		}
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/picsur.lovinghlx.cn/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/picsur.lovinghlx.cn/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+}
+
+# map
+server {
+		server_name  map.lovinghlx.cn;
+		root         /webapps/map;
+
+		location / {  
+				try_files $uri $uri/ /index.html;
+		}
+
+		location ~/dtzx/[^\.]*$ {
+				alias   /webapps/dtzx/;
+				try_files $uri $uri/ index.html break;
+		}
+		location /dtzx/ {
+				alias   /webapps/dtzx/;
+				index  index.html;
+		}
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/picsur.lovinghlx.cn/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/picsur.lovinghlx.cn/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+}
+# tiff
+server {
+		server_name  tiff.lovinghlx.cn;
+		root         /webapps/preview_tiff;
+
+		location / {  
+				try_files $uri $uri/ /index.html;
+		}
+
+		location ~* \.(tif|tiff|png|gif|webp|jpg|jpeg)$ {
+				add_header Access-Control-Allow-Origin *;   
+				add_header Access-Control-Allow-Methods 'GET, OPTIONS';
+		}
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/picsur.lovinghlx.cn/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/picsur.lovinghlx.cn/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+}
+server {
+		server_name  t2g.lovinghlx.cn;
+		root         /webapps/t2g;
+
+		location / {  
+				try_files $uri $uri/ /index.html;
+		}
+
+		location ~* \.(tif|tiff|png|gif|webp|jpg|jpeg)$ {
+				add_header Access-Control-Allow-Origin *;   
+				add_header Access-Control-Allow-Methods 'GET, OPTIONS';
+		}
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/picsur.lovinghlx.cn/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/picsur.lovinghlx.cn/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+}
+server {
+		server_name  gua.lovinghlx.cn;
+		root         /webapps/gua;
+
+		location / {  
+				try_files $uri $uri/ /index.html;
+		}
+
+		location ~* \.(tif|tiff|png|gif|webp|jpg|jpeg)$ {
+				add_header Access-Control-Allow-Origin *;   
+				add_header Access-Control-Allow-Methods 'GET, OPTIONS';
+		}
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/picsur.lovinghlx.cn/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/picsur.lovinghlx.cn/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+}
+# game
+server {
+		server_name  game.lovinghlx.cn;
+		root         /webapps/game;
+
+		location / {  
+				try_files $uri $uri/ /index.html;
+		}
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/picsur.lovinghlx.cn/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/picsur.lovinghlx.cn/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+}
+
+
+server {
+    server_name qdrant.lovinghlx.cn;
+
+    location / {
+        proxy_pass http://localhost:6333;  # 反向代理到 Docker 容器的服务
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/picsur.lovinghlx.cn/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/picsur.lovinghlx.cn/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+}
+
+server {
+    if ($host = lovinghlx.cn) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+		listen       80;
+		listen       [::]:80;
+		server_name  lovinghlx.cn;
+    return 404; # managed by Certbot
+
+
+}
+
+server {
+    if ($host = dify.lovinghlx.cn) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name dify.lovinghlx.cn;
+    return 404; # managed by Certbot
+
+
+}
+server {
+    if ($host = game.lovinghlx.cn) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+		listen       80;
+		listen       [::]:80;
+		server_name  game.lovinghlx.cn;
+    return 404; # managed by Certbot
+
+
+}
+server {
+    if ($host = gua.lovinghlx.cn) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+		listen       80;
+		listen       [::]:80;
+		server_name  gua.lovinghlx.cn;
+    return 404; # managed by Certbot
+
+
+}
+server {
+    if ($host = log.lovinghlx.cn) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+		listen       80;
+		listen       [::]:80;
+		server_name  log.lovinghlx.cn;
+    return 404; # managed by Certbot
+
+
+}
+server {
+    if ($host = map.lovinghlx.cn) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+		listen       80;
+		listen       [::]:80;
+		server_name  map.lovinghlx.cn;
+    return 404; # managed by Certbot
+
+
+}
+
+
+server {
+    if ($host = qdrant.lovinghlx.cn) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name qdrant.lovinghlx.cn;
+    return 404; # managed by Certbot
+
+
+}
+server {
+    if ($host = t2g.lovinghlx.cn) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+		listen       80;
+		listen       [::]:80;
+		server_name  t2g.lovinghlx.cn;
+    return 404; # managed by Certbot
+
+
+}
+server {
+    if ($host = tiff.lovinghlx.cn) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+		listen       80;
+		listen       [::]:80;
+		server_name  tiff.lovinghlx.cn;
+    return 404; # managed by Certbot
+
+
+}server {
+    if ($host = www.lovinghlx.cn) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+		listen       80;
+		listen       [::]:80;
+		server_name  www.lovinghlx.cn;
+    return 404; # managed by Certbot
+
+
+}
+
+server {
+
+    server_name picsur.lovinghlx.cn;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Headers *;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;      # ✅ 补这个
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        client_max_body_size 20m;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/picsur.lovinghlx.cn/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/picsur.lovinghlx.cn/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+
+server {
+    if ($host = picsur.lovinghlx.cn) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+
+        listen       80;
+		listen       [::]:80;
+        server_name picsur.lovinghlx.cn;
+    return 404; # managed by Certbot
+
+
+}
