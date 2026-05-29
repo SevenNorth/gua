@@ -76,16 +76,14 @@ const GuaResult = (props: {
                     loading={loading}
                 />
             )}
-            {guaCode && guaResult && (
-                <AiDetailReading
-                    castingId={castingId}
-                    gua={gua}
-                    guaCode={guaCode}
-                    question={question}
-                />
-            )}
             {guaResult && (
                 <Space className="resultActions">
+                    <AiDetailReading
+                        castingId={castingId}
+                        gua={gua}
+                        guaCode={guaCode}
+                        question={question}
+                    />
                     <Button onClick={handleCopy}>复制结果</Button>
                     <Button onClick={restart}>再来一次</Button>
                 </Space>

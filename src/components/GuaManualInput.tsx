@@ -25,6 +25,7 @@ const GuaManualInput = (props: {
                 请从初爻开始，按从下到上的顺序填写。
             </Typography.Paragraph>
             {gua.map((yao, idx) => {
+                const isCurrentInput = idx === activeIndex;
                 return (
                     <Form.Item
                         labelCol={{ span: labelColSpan }}
@@ -41,7 +42,9 @@ const GuaManualInput = (props: {
                         ]}
                     >
                         <InputNumber
-                            disabled={disabled}
+                            disabled={
+                                disabled || !isCurrentInput || yao !== undefined
+                            }
                             value={yao}
                             min={6}
                             max={9}

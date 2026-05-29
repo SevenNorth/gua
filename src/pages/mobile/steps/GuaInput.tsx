@@ -33,7 +33,7 @@ const GuaInput = (props: {
             {hasCoins ? (
                 <GuaManualInput
                     activeIndex={nextYaoIndex}
-                    disabled={!!disabled || animating}
+                    disabled={!!disabled || animating || !hasCoins}
                     gua={gua}
                     labelColSpan={4}
                     onChange={setYaoAt}

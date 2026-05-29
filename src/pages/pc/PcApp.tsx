@@ -7,7 +7,6 @@ import {
     Row,
     Space,
     Tabs,
-    Typography,
     message,
 } from 'antd';
 import { useEffect } from 'react';
@@ -33,7 +32,6 @@ const PcApp = () => {
         baseReadingResult,
         castCoins,
         castingId,
-        castingUsage,
         clearHistory,
         coins,
         createdAt,
@@ -44,6 +42,7 @@ const PcApp = () => {
         isComplete,
         isQuestionLocked,
         markBaseReadingCompleted,
+        mode,
         nextYaoIndex,
         openHistoryRecord,
         question,
@@ -93,11 +92,6 @@ const PcApp = () => {
                             type="error"
                         />
                     )}
-                    {castingUsage && (
-                        <Typography.Text type="secondary">
-                            今日剩余起卦 {castingUsage.remaining} 次
-                        </Typography.Text>
-                    )}
                     <CoinAnimation animating={animating} coins={coins} />
                     <div className="btnBox">
                         <Space>
@@ -113,9 +107,7 @@ const PcApp = () => {
                                     animating ||
                                     initializing ||
                                     starting ||
-                                    isComplete ||
-                                    (!castingId &&
-                                        castingUsage?.allowed === false)
+                                    isComplete
                                 }
                                 onClick={castCoins}
                             >
@@ -147,7 +139,7 @@ const PcApp = () => {
                             animating ||
                             initializing ||
                             starting ||
-                            (!castingId && castingUsage?.allowed === false)
+                            mode === 'online'
                         }
                         gua={gua}
                         labelColSpan={4}
@@ -173,15 +165,13 @@ const PcApp = () => {
                                             loading={loading}
                                         />
                                         {guaResult && (
-                                            <AiDetailReading
-                                                castingId={castingId}
-                                                gua={gua}
-                                                guaCode={guaCode}
-                                                question={question}
-                                            />
-                                        )}
-                                        {guaResult && (
                                             <Space className="resultActions">
+                                                <AiDetailReading
+                                                    castingId={castingId}
+                                                    gua={gua}
+                                                    guaCode={guaCode}
+                                                    question={question}
+                                                />
                                                 <Button onClick={handleCopy}>
                                                     复制结果
                                                 </Button>

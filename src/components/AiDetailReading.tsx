@@ -1,4 +1,4 @@
-import { Alert, Button, Divider, Space, Typography } from 'antd';
+import { Button, Drawer, Typography, message } from 'antd';
 import { useEffect, useState } from 'react';
 import {
     createAiDetailReading,
@@ -23,24 +23,28 @@ const AiDetailReading = (props: {
     const { castingId, gua, guaCode, question } = props;
     const trimmedQuestion = question.trim();
     const hasQuestion = trimmedQuestion.length > 0;
-    const [error, setError] = useState<string>();
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [remaining, setRemaining] = useState<number>();
     const [result, setResult] = useState<DetailReadingResult>();
 
     useEffect(() => {
-        setError(undefined);
+        setDrawerOpen(false);
         setLoading(false);
         setRemaining(undefined);
         setResult(undefined);
     }, [castingId, guaCode, question]);
 
     const handleGenerate = async () => {
+        if (result) {
+            setDrawerOpen(true);
+            return;
+        }
+
         if (!guaCode || !hasQuestion || loading) {
             return;
         }
 
-        setError(undefined);
         setLoading(true);
 
         try {
@@ -53,63 +57,63 @@ const AiDetailReading = (props: {
                   });
             setResult(response.result);
             setRemaining(response.usage?.remaining);
+            setDrawerOpen(true);
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'AI 详细解卦生成失败');
+            message.error(
+                err instanceof Error ? err.message : 'AI 详细解卦失败',
+            );
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="aiDetailReading">
-            <Divider orientation="left">AI 详细解卦</Divider>
-            <Space className="aiDetailActions" align="center">
-                <Button
-                    type="primary"
-                    disabled={!guaCode || !hasQuestion}
-                    loading={loading}
-                    onClick={handleGenerate}
-                >
-                    {result ? '重新生成' : '生成 AI 解卦'}
-                </Button>
+        <>
+            <Button
+                type="primary"
+                disabled={!guaCode || !hasQuestion}
+                loading={loading}
+                onClick={handleGenerate}
+            >
+                AI 解卦
+            </Button>
+            <Drawer
+                className="aiDetailDrawer"
+                title="AI 解卦"
+                width={520}
+                open={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+            >
                 {remaining !== undefined && (
                     <Typography.Text type="secondary">
                         今日剩余 {remaining} 次
                     </Typography.Text>
                 )}
-            </Space>
-            {error && (
-                <Alert
-                    className="aiDetailAlert"
-                    message={error}
-                    showIcon
-                    type="error"
-                />
-            )}
-            {result && (
-                <div className="aiDetailResult">
-                    <Typography.Title level={5}>
-                        {result.title}
-                    </Typography.Title>
-                    <Typography.Paragraph>
-                        <Typography.Text type="secondary">
-                            {result.questionSummary}
-                        </Typography.Text>
-                    </Typography.Paragraph>
-                    <Typography.Paragraph>
-                        <Typography.Text>
-                            {result.overallJudgement}
-                        </Typography.Text>
-                    </Typography.Paragraph>
-                    <Typography.Text strong>关键建议</Typography.Text>
-                    <ReadingList items={result.keyAdvice} />
-                    <Typography.Text strong>风险提醒</Typography.Text>
-                    <ReadingList items={result.risks} />
-                    <Typography.Text strong>行动建议</Typography.Text>
-                    <ReadingList items={result.actionItems} />
-                </div>
-            )}
-        </div>
+                {result && (
+                    <div className="aiDetailResult">
+                        <Typography.Title level={5}>
+                            {result.title}
+                        </Typography.Title>
+                        <Typography.Paragraph>
+                            <Typography.Text type="secondary">
+                                {result.questionSummary}
+                            </Typography.Text>
+                        </Typography.Paragraph>
+                        <Typography.Paragraph>
+                            <Typography.Text>
+                                {result.overallJudgement}
+                            </Typography.Text>
+                        </Typography.Paragraph>
+                        <Typography.Text strong>关键建议</Typography.Text>
+                        <ReadingList items={result.keyAdvice} />
+                        <Typography.Text strong>风险提醒</Typography.Text>
+                        <ReadingList items={result.risks} />
+                        <Typography.Text strong>行动建议</Typography.Text>
+                        <ReadingList items={result.actionItems} />
+                    </div>
+                )}
+            </Drawer>
+        </>
     );
 };
 

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import '../../common.less';
 import './style.less';
 import InitMsg from './steps/InitMsg';
-import { Alert, Button, Divider, Drawer, Input, Space, Typography } from 'antd';
+import { Alert, Button, Divider, Drawer, Input, Space } from 'antd';
 import GuaInput from './steps/GuaInput';
 import GuaResult from './steps/GuaResult';
 import { ISTEP } from './constants';
@@ -18,7 +18,6 @@ const MobileApp = () => {
         baseReadingResult,
         castCoins,
         castingId,
-        castingUsage,
         clearHistory,
         coins,
         createdAt,
@@ -97,8 +96,7 @@ const MobileApp = () => {
                         coins={coins}
                         disabled={
                             initializing ||
-                            starting ||
-                            (!castingId && castingUsage?.allowed === false)
+                            starting
                         }
                         gua={gua}
                         hasCoins={hasCoins}
@@ -133,7 +131,6 @@ const MobileApp = () => {
         baseReadingResult,
         castCoins,
         castingId,
-        castingUsage,
         coins,
         createdAt,
         gua,
@@ -165,19 +162,12 @@ const MobileApp = () => {
             )}
             {mobileStep === ISTEP.INIT && (
                 <div className="btnBox">
-                    {castingUsage && (
-                        <Typography.Paragraph type="secondary">
-                            今日剩余起卦 {castingUsage.remaining} 次
-                        </Typography.Paragraph>
-                    )}
                     <Divider orientation="center">选择模式</Divider>
 
                     <Space>
                         <Button
                             disabled={
-                                initializing ||
-                                starting ||
-                                castingUsage?.allowed === false
+                                initializing || starting
                             }
                             onClick={() => {
                                 handleStart('online');
@@ -188,9 +178,7 @@ const MobileApp = () => {
                         <Button
                             type="primary"
                             disabled={
-                                initializing ||
-                                starting ||
-                                castingUsage?.allowed === false
+                                initializing || starting
                             }
                             onClick={() => {
                                 handleStart('manual');
