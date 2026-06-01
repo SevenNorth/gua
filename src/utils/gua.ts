@@ -3,6 +3,7 @@ import { CoinValue, GuaLines, YaoValue } from '../types';
 const GUA_LINE_COUNT = 6;
 const DEFAULT_COINS: CoinValue[] = [3, 3, 3];
 const VALID_YAO_VALUES = new Set<number>([6, 7, 8, 9]);
+const YAO_NAMES_FROM_BOTTOM = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'];
 
 /** 创建一个空卦，数组顺序对应页面展示顺序：上爻在前，初爻在后。 */
 const createEmptyGua = (): GuaLines =>
@@ -35,6 +36,17 @@ const getNextYaoIndexFromBottom = (gua: GuaLines): number | undefined => {
     }
 
     return undefined;
+};
+
+/** 将页面展示位置转换为用户熟悉的爻位名称。 */
+const getYaoNameByDisplayIndex = (index: number): string => {
+    const name = YAO_NAMES_FROM_BOTTOM[GUA_LINE_COUNT - 1 - index];
+    return name ?? `第 ${GUA_LINE_COUNT - index} 爻`;
+};
+
+/** 将页面展示位置转换为从下往上的起卦次序。 */
+const getYaoOrderByDisplayIndex = (index: number): number => {
+    return GUA_LINE_COUNT - index;
 };
 
 /** 将三枚硬币结果相加为一个爻值。 */
@@ -124,6 +136,8 @@ export {
     appendYaoFromBottom,
     createEmptyGua,
     getNextYaoIndexFromBottom,
+    getYaoNameByDisplayIndex,
+    getYaoOrderByDisplayIndex,
     guaCodeToDisplayLines,
     guaToCode,
     guaToLinesFromBottom,

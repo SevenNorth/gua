@@ -2,11 +2,22 @@ import { useEffect, useMemo, useState } from 'react';
 import '../../common.less';
 import './style.less';
 import InitMsg from './steps/InitMsg';
-import { Alert, Button, Divider, Drawer, Input, Space } from 'antd';
+import {
+    Alert,
+    Button,
+    Divider,
+    Drawer,
+    Input,
+    Space,
+    Steps,
+    Tooltip,
+    Typography,
+} from 'antd';
 import GuaInput from './steps/GuaInput';
 import GuaResult from './steps/GuaResult';
 import { ISTEP } from './constants';
 import HistoryPanel from '../../components/HistoryPanel';
+import UsageSummaryBar from '../../components/UsageSummaryBar';
 import { useCastingSession } from '../../hooks/useCastingSession';
 import { CastingMode } from '../../types';
 
@@ -18,9 +29,11 @@ const MobileApp = () => {
         baseReadingResult,
         castCoins,
         castingId,
+        castingUsage,
         clearHistory,
         coins,
         createdAt,
+        detailReadingUsage,
         gua,
         guaCode,
         historyRecords,
@@ -52,8 +65,23 @@ const MobileApp = () => {
 
         return ISTEP.INIT;
     }, [step]);
+    const mobileStepIndex = useMemo(() => {
+        if (mobileStep === ISTEP.RESULT) {
+            return 2;
+        }
+
+        if (mobileStep === ISTEP.INPUT) {
+            return 1;
+        }
+
+        return 0;
+    }, [mobileStep]);
 
     const hasCoins = mode === 'manual';
+    const castingLimitReached = castingUsage?.allowed === false && !castingId;
+    const startDisabledReason = castingLimitReached
+        ? '今日起卦次数已用完，请明日再来'
+        : undefined;
 
     const handleStart = (nextMode: CastingMode) => {
         startCasting(nextMode);
@@ -95,9 +123,9 @@ const MobileApp = () => {
                         castCoins={castCoins}
                         coins={coins}
                         disabled={
-                            initializing ||
-                            starting
+                            initializing || starting || castingLimitReached
                         }
+                        disabledReason={startDisabledReason}
                         gua={gua}
                         hasCoins={hasCoins}
                         isComplete={isComplete}
@@ -118,6 +146,7 @@ const MobileApp = () => {
                         markBaseReadingCompleted={markBaseReadingCompleted}
                         question={question}
                         restart={restart}
+                        detailReadingUsage={detailReadingUsage}
                     />
                 );
                 break;
@@ -147,10 +176,27 @@ const MobileApp = () => {
         setQuestion,
         setYaoAt,
         starting,
+        castingLimitReached,
+        startDisabledReason,
+        detailReadingUsage,
     ]);
 
     return (
         <div className="Mobile_App_Box">
+            <Steps
+                className="mobileSteps"
+                current={mobileStepIndex}
+                items={[
+                    { title: '提问' },
+                    { title: '起卦' },
+                    { title: '解卦' },
+                ]}
+                size="small"
+            />
+            <UsageSummaryBar
+                castingUsage={castingUsage}
+                detailReadingUsage={detailReadingUsage}
+            />
             {content}
             {apiError && (
                 <Alert
@@ -163,29 +209,45 @@ const MobileApp = () => {
             {mobileStep === ISTEP.INIT && (
                 <div className="btnBox">
                     <Divider orientation="center">选择模式</Divider>
+                    {!isQuestionLocked && (
+                        <Typography.Paragraph
+                            className="startNotice"
+                            type="secondary"
+                        >
+                            开始后将锁定所问之事，并消耗 1 次今日起卦次数。
+                        </Typography.Paragraph>
+                    )}
 
                     <Space>
-                        <Button
-                            disabled={
-                                initializing || starting
-                            }
-                            onClick={() => {
-                                handleStart('online');
-                            }}
-                        >
-                            没有硬币！在线抛
-                        </Button>
-                        <Button
-                            type="primary"
-                            disabled={
-                                initializing || starting
-                            }
-                            onClick={() => {
-                                handleStart('manual');
-                            }}
-                        >
-                            我有硬币！真的抛
-                        </Button>
+                        <Tooltip title={startDisabledReason}>
+                            <Button
+                                disabled={
+                                    initializing ||
+                                    starting ||
+                                    castingLimitReached
+                                }
+                                onClick={() => {
+                                    handleStart('online');
+                                }}
+                            >
+                                没有硬币！在线抛
+                            </Button>
+                        </Tooltip>
+                        <Tooltip title={startDisabledReason}>
+                            <Button
+                                type="primary"
+                                disabled={
+                                    initializing ||
+                                    starting ||
+                                    castingLimitReached
+                                }
+                                onClick={() => {
+                                    handleStart('manual');
+                                }}
+                            >
+                                我有硬币！真的抛
+                            </Button>
+                        </Tooltip>
                     </Space>
                     <div className="historyEntry">
                         <Button onClick={() => setHistoryOpen(true)}>
@@ -203,6 +265,11 @@ const MobileApp = () => {
             >
                 <HistoryPanel
                     disableOpen={!!castingId}
+                    disabledOpenReason={
+                        castingId
+                            ? '当前起卦完成后才能打开历史记录'
+                            : undefined
+                    }
                     records={historyRecords}
                     onClear={clearHistory}
                     onOpen={openHistoryRecord}

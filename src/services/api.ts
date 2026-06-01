@@ -1,20 +1,33 @@
-const getApiErrorMessage = async (
+class ApiRequestError extends Error {
+    details?: unknown;
+
+    constructor(message: string, details?: unknown) {
+        super(message);
+        this.name = 'ApiRequestError';
+        this.details = details;
+    }
+}
+
+const getApiError = async (
     response: Response,
     fallbackMessage: string,
-): Promise<string> => {
+): Promise<ApiRequestError> => {
     try {
         const body: unknown = await response.json();
         if (body && typeof body === 'object') {
             const error = (body as { error?: { message?: unknown } }).error;
             if (typeof error?.message === 'string') {
-                return error.message;
+                return new ApiRequestError(
+                    error.message,
+                    (error as { details?: unknown }).details,
+                );
             }
         }
     } catch {
-        return fallbackMessage;
+        return new ApiRequestError(fallbackMessage);
     }
 
-    return fallbackMessage;
+    return new ApiRequestError(fallbackMessage);
 };
 
 const requestJson = async <T>(
@@ -32,10 +45,10 @@ const requestJson = async <T>(
     });
 
     if (!response.ok) {
-        throw new Error(await getApiErrorMessage(response, fallbackMessage));
+        throw await getApiError(response, fallbackMessage);
     }
 
     return (await response.json()) as T;
 };
 
-export { getApiErrorMessage, requestJson };
+export { ApiRequestError, getApiError, requestJson };

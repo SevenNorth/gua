@@ -5,7 +5,7 @@ import GuaExplain from '../../../components/GuaExplain';
 import GuaGraph from '../../../components/GuaGraph';
 import GuaSessionMeta from '../../../components/GuaSessionMeta';
 import { useGuaExplain } from '../../../hooks/useGuaExplain';
-import { GuaLines, IGua } from '../../../types';
+import { GuaLines, IGua, UsageSummary } from '../../../types';
 import { buildGuaShareText, copyText } from '../../../utils/share';
 
 const GuaResult = (props: {
@@ -18,6 +18,7 @@ const GuaResult = (props: {
     markBaseReadingCompleted: (guaResult: IGua) => void;
     question: string;
     restart: () => void;
+    detailReadingUsage?: UsageSummary;
 }) => {
     const {
         baseReadingCompleted,
@@ -29,6 +30,7 @@ const GuaResult = (props: {
         markBaseReadingCompleted,
         question,
         restart,
+        detailReadingUsage,
     } = props;
     const { error, guaResult, loading } = useGuaExplain(
         guaCode,
@@ -83,6 +85,7 @@ const GuaResult = (props: {
                         gua={gua}
                         guaCode={guaCode}
                         question={question}
+                        usage={detailReadingUsage}
                     />
                     <Button onClick={handleCopy}>复制结果</Button>
                     <Button onClick={restart}>再来一次</Button>

@@ -5,6 +5,10 @@ const coinFlip = () => {
 
 /** 根据浏览器 UA 粗略判断是否使用移动端页面。 */
 const isMobile = () => {
+    if (window.matchMedia('(max-width: 768px)').matches) {
+        return true;
+    }
+
     const ua = navigator.userAgent;
     // 通过ua判断是不是移动端
     const mobileKeywords = [

@@ -1,4 +1,5 @@
 import { Button, Space } from 'antd';
+import CastingProgressHint from '../../../components/CastingProgressHint';
 import CoinAnimation from '../../../components/CoinAnimation';
 import GuaGraph from '../../../components/GuaGraph';
 import GuaManualInput from '../../../components/GuaManualInput';
@@ -10,6 +11,7 @@ const GuaInput = (props: {
     castCoins: () => void;
     coins: CoinValue[];
     disabled?: boolean;
+    disabledReason?: string;
     gua: GuaLines;
     isComplete: boolean;
     nextYaoIndex?: number;
@@ -20,6 +22,7 @@ const GuaInput = (props: {
         castCoins,
         coins,
         disabled,
+        disabledReason,
         gua,
         isComplete,
         nextYaoIndex,
@@ -29,11 +32,18 @@ const GuaInput = (props: {
 
     return (
         <div className="GuaInput">
+            <CastingProgressHint
+                animating={animating}
+                coins={coins}
+                gua={gua}
+                nextYaoIndex={nextYaoIndex}
+            />
             <GuaGraph gua={gua} activeIndex={nextYaoIndex} />
             {hasCoins ? (
                 <GuaManualInput
                     activeIndex={nextYaoIndex}
                     disabled={!!disabled || animating || !hasCoins}
+                    disabledReason={disabledReason}
                     gua={gua}
                     labelColSpan={4}
                     onChange={setYaoAt}

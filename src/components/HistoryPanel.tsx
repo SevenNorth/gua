@@ -1,4 +1,13 @@
-import { Button, Empty, List, Popconfirm, Space, Typography, message } from 'antd';
+import {
+    Button,
+    Empty,
+    List,
+    Popconfirm,
+    Space,
+    Tooltip,
+    Typography,
+    message,
+} from 'antd';
 import { GuaHistoryRecord } from '../types';
 import {
     buildHistoryShareText,
@@ -8,11 +17,12 @@ import {
 
 const HistoryPanel = (props: {
     disableOpen?: boolean;
+    disabledOpenReason?: string;
     records: GuaHistoryRecord[];
     onClear: () => void;
     onOpen: (record: GuaHistoryRecord) => void;
 }) => {
-    const { disableOpen, records, onClear, onOpen } = props;
+    const { disableOpen, disabledOpenReason, records, onClear, onOpen } = props;
 
     const handleCopy = async (record: GuaHistoryRecord) => {
         try {
@@ -35,15 +45,16 @@ const HistoryPanel = (props: {
                 renderItem={(record) => (
                     <List.Item
                         actions={[
-                            <Button
-                                disabled={disableOpen}
-                                key="open"
-                                size="small"
-                                type="link"
-                                onClick={() => onOpen(record)}
-                            >
-                                打开
-                            </Button>,
+                            <Tooltip key="open" title={disabledOpenReason}>
+                                <Button
+                                    disabled={disableOpen}
+                                    size="small"
+                                    type="link"
+                                    onClick={() => onOpen(record)}
+                                >
+                                    打开
+                                </Button>
+                            </Tooltip>,
                             <Button
                                 key="copy"
                                 size="small"

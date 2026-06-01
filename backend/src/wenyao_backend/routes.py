@@ -123,6 +123,23 @@ def create_casting(
         }
 
     now = utcnow()
+    usage = get_usage(db, visitor.visitor_id, settings)
+    if usage.casting_count >= settings.casting_daily_limit:
+        raise ApiError(
+            "CASTING_LIMIT_EXCEEDED",
+            "今日起卦次数已用完，请明日再来。",
+            status_code=429,
+            details={
+                "castingUsage": get_usage_summary(
+                    db,
+                    visitor.visitor_id,
+                    settings,
+                    kind="casting",
+                ),
+                "nextResetAt": next_reset_at(settings).isoformat(),
+            },
+        )
+
     casting = Casting(
         casting_id=f"cst_{secrets.token_urlsafe(18)}",
         visitor_id=visitor.visitor_id,
@@ -133,6 +150,8 @@ def create_casting(
         updated_at=now,
     )
     db.add(casting)
+    usage.casting_count += 1
+    usage.updated_at = now
     usage_payload_data = usage_payload(db, visitor.visitor_id, settings)
     db.commit()
     db.refresh(casting)

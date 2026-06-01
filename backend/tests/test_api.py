@@ -85,7 +85,7 @@ def test_casting_flow_and_detail_reading_cache(tmp_path: Path, monkeypatch) -> N
         assert create_response.status_code == 200
         create_body = create_response.json()
         casting_id = create_body["casting"]["castingId"]
-        assert create_body["castingUsage"]["used"] == 0
+        assert create_body["castingUsage"]["used"] == 1
 
         reused_response = client.post(
             "/api/castings",
@@ -94,7 +94,7 @@ def test_casting_flow_and_detail_reading_cache(tmp_path: Path, monkeypatch) -> N
         assert reused_response.status_code == 200
         assert reused_response.json()["reused"] is True
         assert reused_response.json()["casting"]["castingId"] == casting_id
-        assert reused_response.json()["castingUsage"]["used"] == 0
+        assert reused_response.json()["castingUsage"]["used"] == 1
 
         lines_response = client.patch(
             f"/api/castings/{casting_id}/lines",
@@ -151,14 +151,16 @@ def test_ai_detail_reading_endpoint_counts_usage(tmp_path: Path, monkeypatch) ->
         assert body["detailReadingUsage"]["used"] == 1
 
 
-def test_casting_creation_is_unlimited(tmp_path: Path) -> None:
-    with make_client(tmp_path, casting_daily_limit=0) as client:
+def test_casting_creation_respects_daily_limit(tmp_path: Path) -> None:
+    with make_client(tmp_path, casting_daily_limit=1) as client:
         first_response = client.post(
             "/api/castings",
             json={"question": "第一次", "mode": "manual"},
         )
         assert first_response.status_code == 200
         first_casting_id = first_response.json()["casting"]["castingId"]
+        assert first_response.json()["castingUsage"]["used"] == 1
+        assert first_response.json()["castingUsage"]["remaining"] == 0
 
         lines_response = client.patch(
             f"/api/castings/{first_casting_id}/lines",
@@ -173,9 +175,11 @@ def test_casting_creation_is_unlimited(tmp_path: Path) -> None:
             "/api/castings",
             json={"question": "第二次", "mode": "manual"},
         )
-        assert second_response.status_code == 200
-        assert second_response.json()["reused"] is False
-        assert second_response.json()["castingUsage"]["used"] == 0
+        assert second_response.status_code == 429
+        body = second_response.json()
+        assert body["error"]["code"] == "CASTING_LIMIT_EXCEEDED"
+        assert body["error"]["details"]["castingUsage"]["used"] == 1
+        assert body["error"]["details"]["castingUsage"]["remaining"] == 0
 
 
 def test_parse_ai_result_accepts_json_code_fence() -> None:

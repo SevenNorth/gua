@@ -6,7 +6,7 @@ interface DetailReadingResponse {
     detailReading: {
         status: string;
         result?: unknown;
-    };
+    } | null;
     detailReadingUsage?: UsageSummary;
 }
 
@@ -102,4 +102,33 @@ const createCastingDetailReading = async (
     };
 };
 
-export { createAiDetailReading, createCastingDetailReading };
+const getCastingDetailReading = async (
+    castingId: string,
+): Promise<{
+    result?: DetailReadingResult;
+    status?: string;
+    usage?: UsageSummary;
+}> => {
+    const body = await requestJson<DetailReadingResponse>(
+        `/api/castings/${castingId}/detail-reading`,
+        { method: 'GET' },
+        'AI 详细解卦加载失败',
+    );
+
+    const result = body.detailReading?.result;
+    if (result !== undefined && !isDetailReadingResult(result)) {
+        throw new Error('AI 详细解卦返回数据不完整');
+    }
+
+    return {
+        result,
+        status: body.detailReading?.status,
+        usage: body.detailReadingUsage,
+    };
+};
+
+export {
+    createAiDetailReading,
+    createCastingDetailReading,
+    getCastingDetailReading,
+};

@@ -40,6 +40,7 @@ import {
     restartCasting,
     updateCastingLines,
 } from '../services/casting';
+import { ApiRequestError } from '../services/api';
 
 const CASTING_DURATION = 2000;
 
@@ -170,6 +171,24 @@ const useCastingSession = () => {
             castingUsage: payload.castingUsage,
             detailReadingUsage: payload.detailReadingUsage,
         });
+    }, []);
+
+    const applyUsageFromError = useCallback((err: unknown) => {
+        if (!(err instanceof ApiRequestError)) {
+            return;
+        }
+
+        const details = err.details;
+        if (!details || typeof details !== 'object') {
+            return;
+        }
+
+        const usage = details as UsageState;
+        setUsageState((current) => ({
+            castingUsage: usage.castingUsage ?? current.castingUsage,
+            detailReadingUsage:
+                usage.detailReadingUsage ?? current.detailReadingUsage,
+        }));
     }, []);
 
     const applyBackendCasting = useCallback((casting: BackendCasting) => {
@@ -303,6 +322,7 @@ const useCastingSession = () => {
                     return result.casting.castingId;
                 })
                 .catch((err: unknown) => {
+                    applyUsageFromError(err);
                     setApiError(
                         err instanceof Error ? err.message : '起卦会话创建失败',
                     );
@@ -316,7 +336,14 @@ const useCastingSession = () => {
             startPromiseRef.current = promise;
             return promise;
         },
-        [applyBackendCasting, applyUsage, castingId, question, step],
+        [
+            applyBackendCasting,
+            applyUsage,
+            applyUsageFromError,
+            castingId,
+            question,
+            step,
+        ],
     );
 
     const setQuestion = useCallback(
@@ -420,6 +447,7 @@ const useCastingSession = () => {
                 setApiError(undefined);
             })
             .catch((err: unknown) => {
+                applyUsageFromError(err);
                 submitLinesRef.current = undefined;
                 setApiError(
                     err instanceof Error ? err.message : '基础解卦提交失败',
@@ -428,6 +456,7 @@ const useCastingSession = () => {
     }, [
         applyBackendCasting,
         applyUsage,
+        applyUsageFromError,
         baseReadingCompleted,
         castingId,
         createdAt,
@@ -471,9 +500,10 @@ const useCastingSession = () => {
                 setApiError(undefined);
             })
             .catch((err: unknown) => {
+                applyUsageFromError(err);
                 setApiError(err instanceof Error ? err.message : '重新起卦失败');
             });
-    }, [applyUsage, castingId, resetLocalCasting]);
+    }, [applyUsage, applyUsageFromError, castingId, resetLocalCasting]);
 
     const markBaseReadingCompleted = useCallback(
         (guaResult: IGua) => {

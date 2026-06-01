@@ -1,10 +1,15 @@
 import { Form, InputNumber, Typography } from 'antd';
 import { GuaLines } from '../types';
+import {
+    getYaoNameByDisplayIndex,
+    getYaoOrderByDisplayIndex,
+} from '../utils/gua';
 
 /** 手动录入六爻结果，输入顺序与页面卦象展示顺序一致。 */
 const GuaManualInput = (props: {
     activeIndex?: number;
     disabled: boolean;
+    disabledReason?: string;
     gua: GuaLines;
     labelColSpan: number;
     onChange: (index: number, value: number | null) => void;
@@ -13,6 +18,7 @@ const GuaManualInput = (props: {
     const {
         activeIndex,
         disabled,
+        disabledReason,
         gua,
         labelColSpan,
         onChange,
@@ -26,14 +32,23 @@ const GuaManualInput = (props: {
             </Typography.Paragraph>
             {gua.map((yao, idx) => {
                 const isCurrentInput = idx === activeIndex;
+                const yaoName = getYaoNameByDisplayIndex(idx);
                 return (
                     <Form.Item
                         labelCol={{ span: labelColSpan }}
                         wrapperCol={{ span: wrapperColSpan }}
                         key={idx}
-                        label={`${idx === activeIndex ? '当前：' : ''}爻 ${
-                            6 - idx
-                        }`}
+                        label={`${
+                            idx === activeIndex ? '当前：' : ''
+                        }${yaoName}`}
+                        extra={
+                            isCurrentInput
+                                ? disabledReason ??
+                                  `第 ${getYaoOrderByDisplayIndex(
+                                      idx,
+                                  )} 次抛掷结果`
+                                : undefined
+                        }
                         rules={[
                             {
                                 required: true,
