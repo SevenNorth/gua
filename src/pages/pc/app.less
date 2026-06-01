@@ -1,21 +1,88 @@
 .contentBox {
-    height: 100%;
+    height: 100vh;
+    min-height: 0;
+    overflow: hidden;
 
     .yaoBox {
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
         .headerBox {
-            padding: 0 5rem;
+            width: 100%;
+            padding: 1.25rem 4rem 0;
             display: block;
-            padding-top: 2rem;
+
+            .ant-typography {
+                margin-bottom: 0.5rem;
+            }
+
+            h1.ant-typography {
+                font-size: 1.75rem;
+                line-height: 1.2;
+            }
+
+            h4.ant-typography,
+            h5.ant-typography {
+                margin-top: 0.25rem;
+            }
+
+            .ant-typography,
+            li {
+                line-height: 1.5;
+            }
+
+            ol {
+                margin-bottom: 0;
+                padding-left: 1.25rem;
+            }
+
+            li {
+                margin-bottom: 0.25rem;
+            }
         }
 
         .btnBox {
-            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+            margin-top: 0.75rem;
             text-align: center;
+        }
+
+        .usageSummary {
+            margin: 0.5rem 0;
+        }
+
+        .startNotice {
+            margin-bottom: 0.5rem;
+        }
+
+        .animationBox {
+            flex: 1;
+            min-height: 0;
+            align-items: flex-end;
+        }
+
+        .coinWrapper {
+            height: 22rem;
+
+            &.animating {
+                .coinBox {
+                    animation: coin_rotate 0.5s linear infinite alternate,
+                        pc_coin_position 2s linear infinite alternate;
+                }
+            }
         }
 
     }
 
     .guaBox {
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
         padding: 2rem 5rem 0;
         display: flex;
         flex-direction: column;
@@ -43,6 +110,7 @@
         padding: 0 3rem;
         height: 100%;
         min-height: 0;
+        overflow: hidden;
 
         li {
             list-style: square;
@@ -56,14 +124,18 @@
             > .ant-tabs-content-holder {
                 min-height: 0;
                 flex: 1;
+                overflow: hidden;
             }
 
             > .ant-tabs-content-holder > .ant-tabs-content {
                 height: 100%;
+                min-height: 0;
             }
 
             .ant-tabs-tabpane {
                 height: 100%;
+                min-height: 0;
+                overflow: hidden;
             }
         }
 
@@ -102,5 +174,51 @@
             padding-top: 1rem;
             padding-bottom: 1rem;
         }
+    }
+}
+
+@keyframes pc_coin_position {
+    0% {
+        bottom: 0rem;
+    }
+
+    10% {
+        bottom: 4rem;
+    }
+
+    20% {
+        bottom: 8rem;
+    }
+
+    30% {
+        bottom: 12rem;
+    }
+
+    40% {
+        bottom: 15rem;
+    }
+
+    50% {
+        bottom: 17rem;
+    }
+
+    60% {
+        bottom: 15rem;
+    }
+
+    70% {
+        bottom: 12rem;
+    }
+
+    80% {
+        bottom: 8rem;
+    }
+
+    90% {
+        bottom: 4rem;
+    }
+
+    100% {
+        bottom: 0rem;
     }
 }
